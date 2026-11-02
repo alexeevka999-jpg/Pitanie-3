@@ -25,13 +25,9 @@ import java.util.Locale
 class MainActivity : Activity() {
 
     private val green = Color.rgb(15, 91, 50)
-
     private lateinit var root: LinearLayout
-
     private val receipts = mutableListOf<Receipt>()
-
     private var month = YearMonth.now()
-
     private var photoUri: Uri? = null
 
     private val pick = 100
@@ -75,7 +71,6 @@ class MainActivity : Activity() {
     }
 
     private fun start(title: String) {
-
         window.statusBarColor = Color.rgb(247, 249, 246)
         window.navigationBarColor = Color.BLACK
 
@@ -90,7 +85,6 @@ class MainActivity : Activity() {
 
         val scroll = ScrollView(this)
         scroll.addView(root)
-
         setContentView(scroll)
 
         label("ПИТАНИЕ", 23, true, green)
@@ -103,7 +97,6 @@ class MainActivity : Activity() {
         bold: Boolean = false,
         color: Int = Color.rgb(30, 45, 36)
     ) {
-
         root.addView(
             TextView(this).apply {
                 text = textValue
@@ -122,7 +115,6 @@ class MainActivity : Activity() {
         textValue: String,
         action: () -> Unit
     ) {
-
         root.addView(
             Button(this).apply {
                 text = textValue
@@ -152,24 +144,16 @@ class MainActivity : Activity() {
     }
 
     private fun weightGrams(items: List<Item>): Double {
-
         return items.sumOf { item ->
-
-            when (
-                item.unit.trim().lowercase(Locale.ROOT)
-            ) {
-
+            when (item.unit.trim().lowercase(Locale.ROOT)) {
                 "кг", "kg" -> item.qty * 1000.0
-
                 "г", "гр", "g" -> item.qty
-
                 else -> 0.0
             }
         }
     }
 
     private fun weightLabel(items: List<Item>): String {
-
         val grams = weightGrams(items)
 
         return String.format(
@@ -180,11 +164,9 @@ class MainActivity : Activity() {
     }
 
     private fun category(item: Item): String {
-
         val name = item.name.lowercase(Locale.ROOT)
 
         return when {
-
             listOf("яйц", "яйцо").any {
                 name.contains(it)
             } -> "Яйца"
@@ -277,25 +259,16 @@ class MainActivity : Activity() {
     }
 
     private fun unitTotals(items: List<Item>): String {
-
         var grams = 0.0
         var liters = 0.0
         var pieces = 0.0
 
         for (item in items) {
-
-            when (
-                item.unit.trim().lowercase(Locale.ROOT)
-            ) {
-
+            when (item.unit.trim().lowercase(Locale.ROOT)) {
                 "кг", "kg" -> grams += item.qty * 1000
-
                 "г", "гр", "g" -> grams += item.qty
-
                 "л", "l" -> liters += item.qty
-
                 "мл", "ml" -> liters += item.qty / 1000
-
                 "шт", "штук", "уп" -> pieces += item.qty
             }
         }
@@ -303,17 +276,13 @@ class MainActivity : Activity() {
         val result = mutableListOf<String>()
 
         if (grams > 0) {
-
             result += if (grams >= 1000) {
-
                 String.format(
                     Locale("ru", "RU"),
                     "%.3f кг",
                     grams / 1000
                 )
-
             } else {
-
                 String.format(
                     Locale("ru", "RU"),
                     "%.0f г",
@@ -323,7 +292,6 @@ class MainActivity : Activity() {
         }
 
         if (liters > 0) {
-
             result += String.format(
                 Locale("ru", "RU"),
                 "%.3f л",
@@ -332,7 +300,6 @@ class MainActivity : Activity() {
         }
 
         if (pieces > 0) {
-
             result += String.format(
                 Locale("ru", "RU"),
                 "%.0f шт.",
@@ -348,7 +315,6 @@ class MainActivity : Activity() {
     }
 
     private fun categories(items: List<Item>) {
-
         label(
             "ПО КАТЕГОРИЯМ",
             21,
@@ -360,16 +326,14 @@ class MainActivity : Activity() {
             .toSortedMap()
             .forEach { (categoryName, values) ->
 
-                button(
+                card(
                     "$categoryName\n" +
                     "${unitTotals(values)} · " +
                     money(values.sumOf { it.total })
                 ) {
-
                     start(categoryName)
 
                     values.forEach {
-
                         label(
                             "${it.name} — " +
                             "${unitTotals(listOf(it))} — " +
@@ -385,7 +349,6 @@ class MainActivity : Activity() {
     }
 
     private fun receiptTotal(receipt: Receipt): Double {
-
         return if (receipt.printedTotal > 0) {
             receipt.printedTotal
         } else {
@@ -393,26 +356,77 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+    private fun dp(value: Int): Int =
+        (value * resources.displayMetrics.density).toInt()
 
-    private fun card(textValue: String, action: (() -> Unit)? = null, prominent: Boolean = false) {
+    // ИСПРАВЛЕНО:
+    // action теперь последний параметр.
+    // Это позволяет использовать card("Текст") { действие() }.
+    private fun card(
+        textValue: String,
+        prominent: Boolean = false,
+        action: (() -> Unit)? = null
+    ) {
         val view = TextView(this).apply {
             text = textValue
             textSize = if (prominent) 19f else 16f
-            setTextColor(if (prominent) Color.WHITE else Color.rgb(27, 49, 36))
-            setTypeface(null, if (prominent) Typeface.BOLD else Typeface.NORMAL)
+
+            setTextColor(
+                if (prominent) {
+                    Color.WHITE
+                } else {
+                    Color.rgb(27, 49, 36)
+                }
+            )
+
+            setTypeface(
+                null,
+                if (prominent) {
+                    Typeface.BOLD
+                } else {
+                    Typeface.NORMAL
+                }
+            )
+
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(17), dp(13), dp(15), dp(13))
-            background = android.graphics.drawable.GradientDrawable().apply {
-                cornerRadius = dp(13).toFloat()
-                setColor(if (prominent) green else Color.WHITE)
-                setStroke(dp(1), Color.rgb(218, 228, 221))
+            setPadding(
+                dp(17),
+                dp(13),
+                dp(15),
+                dp(13)
+            )
+
+            background =
+                android.graphics.drawable.GradientDrawable().apply {
+                    cornerRadius = dp(13).toFloat()
+
+                    setColor(
+                        if (prominent) {
+                            green
+                        } else {
+                            Color.WHITE
+                        }
+                    )
+
+                    setStroke(
+                        dp(1),
+                        Color.rgb(218, 228, 221)
+                    )
+                }
+
+            if (action != null) {
+                setOnClickListener {
+                    action()
+                }
             }
-            if (action != null) setOnClickListener { action() }
         }
-        root.addView(view, LinearLayout.LayoutParams(-1, -2).apply {
-            bottomMargin = dp(9)
-        })
+
+        root.addView(
+            view,
+            LinearLayout.LayoutParams(-1, -2).apply {
+                bottomMargin = dp(9)
+            }
+        )
     }
 
     private fun section(textValue: String) {
@@ -424,6 +438,7 @@ class MainActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             setPadding(0, dp(9), 0, dp(5))
         }
+
         val entries = listOf(
             "🛒\nПокупки" to { home() },
             "🍏\nПитание" to { food() },
@@ -431,140 +446,380 @@ class MainActivity : Activity() {
             "▤\nОтчёты" to { reports() },
             "☰\nЕщё" to { moreMenu() }
         )
+
         entries.forEach { (title, action) ->
             val view = TextView(this).apply {
                 text = title
                 textSize = 12f
                 gravity = Gravity.CENTER
                 setTextColor(green)
-                setPadding(dp(2), dp(12), dp(2), dp(12))
+
+                setPadding(
+                    dp(2),
+                    dp(12),
+                    dp(2),
+                    dp(12)
+                )
+
                 setTypeface(null, Typeface.BOLD)
-                setOnClickListener { action() }
+
+                setOnClickListener {
+                    action()
+                }
             }
-            bar.addView(view, LinearLayout.LayoutParams(0, -2, 1f))
+
+            bar.addView(
+                view,
+                LinearLayout.LayoutParams(0, -2, 1f)
+            )
         }
+
         root.addView(bar)
     }
 
     private fun reports() {
         start("Отчёты")
-        val byYear = receipts.groupBy { it.date.take(4) }.toSortedMap(compareByDescending { it })
-        if (byYear.isEmpty()) label("Пока нет покупок")
-        byYear.forEach { (year, values) ->
-            card("📅 $year    ${money(values.sumOf { receiptTotal(it) })}\n${values.size} покупок · ${values.sumOf { it.items.size }} товаров")
+
+        val byYear = receipts
+            .groupBy { it.date.take(4) }
+            .toSortedMap(compareByDescending { it })
+
+        if (byYear.isEmpty()) {
+            label("Пока нет покупок")
         }
-        button("← Покупки") { home() }
+
+        byYear.forEach { (year, values) ->
+            card(
+                "📅 $year    " +
+                "${money(values.sumOf { receiptTotal(it) })}\n" +
+                "${values.size} покупок · " +
+                "${values.sumOf { it.items.size }} товаров"
+            )
+        }
+
+        button("← Покупки") {
+            home()
+        }
     }
 
     private fun moreMenu() {
         start("Ещё")
-        card("💾 Создать резервную копию") { backup() }
-        card("↩ Восстановить из файла") { restore() }
-        card("📊 Отчёты по годам") { reports() }
-        label("Все покупки хранятся на телефоне. Распознавание работает без интернета.", 14)
-        button("← Покупки") { home() }
+
+        card("💾 Создать резервную копию") {
+            backup()
+        }
+
+        card("↩ Восстановить из файла") {
+            restore()
+        }
+
+        card("📊 Отчёты по годам") {
+            reports()
+        }
+
+        label(
+            "Все покупки хранятся на телефоне. " +
+            "Распознавание работает без интернета.",
+            14
+        )
+
+        button("← Покупки") {
+            home()
+        }
     }
 
     private fun home() {
         start("Покупки по месяцам")
-        val monthText = month.format(DateTimeFormatter.ofPattern("LLLL yyyy", Locale("ru", "RU")))
-        val controls = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        fun monthControl(textValue: String, weight: Float, action: () -> Unit) {
-            controls.addView(TextView(this).apply {
-                text = textValue
-                textSize = 18f
-                gravity = Gravity.CENTER
-                setTextColor(green)
-                setTypeface(null, Typeface.BOLD)
-                setPadding(dp(3), dp(12), dp(3), dp(12))
-                setOnClickListener { action() }
-            }, LinearLayout.LayoutParams(0, -2, weight))
+
+        val monthText = month.format(
+            DateTimeFormatter.ofPattern(
+                "LLLL yyyy",
+                Locale("ru", "RU")
+            )
+        )
+
+        val controls = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
         }
-        monthControl("❮", 1f) { month = month.minusMonths(1); home() }
-        monthControl("🗓 $monthText", 5f) { month = YearMonth.now(); home() }
-        monthControl("❯", 1f) { month = month.plusMonths(1); home() }
+
+        fun monthControl(
+            textValue: String,
+            weight: Float,
+            action: () -> Unit
+        ) {
+            controls.addView(
+                TextView(this).apply {
+                    text = textValue
+                    textSize = 18f
+                    gravity = Gravity.CENTER
+                    setTextColor(green)
+                    setTypeface(null, Typeface.BOLD)
+
+                    setPadding(
+                        dp(3),
+                        dp(12),
+                        dp(3),
+                        dp(12)
+                    )
+
+                    setOnClickListener {
+                        action()
+                    }
+                },
+                LinearLayout.LayoutParams(0, -2, weight)
+            )
+        }
+
+        monthControl("❮", 1f) {
+            month = month.minusMonths(1)
+            home()
+        }
+
+        monthControl("🗓 $monthText", 5f) {
+            month = YearMonth.now()
+            home()
+        }
+
+        monthControl("❯", 1f) {
+            month = month.plusMonths(1)
+            home()
+        }
+
         root.addView(controls)
 
-        val selected = receipts.filter { it.date.startsWith(month.toString()) }
-        val monthlyItems = selected.flatMap { it.items }
-        val monthlyTotal = selected.sumOf { receiptTotal(it) }
-        val totalItems = receipts.sumOf { it.items.size }
-        val allTotal = receipts.sumOf { receiptTotal(it) }
+        val selected = receipts.filter {
+            it.date.startsWith(month.toString())
+        }
+
+        val monthlyItems = selected.flatMap {
+            it.items
+        }
+
+        val monthlyTotal = selected.sumOf {
+            receiptTotal(it)
+        }
+
+        val totalItems = receipts.sumOf {
+            it.items.size
+        }
+
+        val allTotal = receipts.sumOf {
+            receiptTotal(it)
+        }
 
         val summary = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(13), dp(18), dp(13))
-            background = android.graphics.drawable.GradientDrawable().apply {
-                cornerRadius = dp(15).toFloat()
-                setColor(Color.rgb(222, 243, 229))
+
+            setPadding(
+                dp(18),
+                dp(13),
+                dp(18),
+                dp(13)
+            )
+
+            background =
+                android.graphics.drawable.GradientDrawable().apply {
+                    cornerRadius = dp(15).toFloat()
+                    setColor(Color.rgb(222, 243, 229))
+                }
+        }
+
+        fun summaryLine(
+            value: String,
+            size: Float,
+            bold: Boolean = false
+        ) {
+            summary.addView(
+                TextView(this).apply {
+                    text = value
+                    textSize = size
+                    setTextColor(Color.rgb(25, 62, 42))
+
+                    if (bold) {
+                        setTypeface(null, Typeface.BOLD)
+                    }
+                }
+            )
+        }
+
+        summaryLine(
+            "🛒  ПОТРАЧЕНО ЗА МЕСЯЦ",
+            15f,
+            true
+        )
+
+        summaryLine(
+            money(monthlyTotal),
+            31f,
+            true
+        )
+
+        summaryLine(
+            "${selected.size} покупок · " +
+            "${monthlyItems.size} товаров · " +
+            weightLabel(monthlyItems),
+            14f
+        )
+
+        root.addView(
+            summary,
+            LinearLayout.LayoutParams(-1, -2).apply {
+                bottomMargin = dp(12)
             }
-        }
-        fun summaryLine(value: String, size: Float, bold: Boolean = false) {
-            summary.addView(TextView(this).apply {
-                text = value
-                textSize = size
-                setTextColor(Color.rgb(25, 62, 42))
-                if (bold) setTypeface(null, Typeface.BOLD)
-            })
-        }
-        summaryLine("🛒  ПОТРАЧЕНО ЗА МЕСЯЦ", 15f, true)
-        summaryLine(money(monthlyTotal), 31f, true)
-        summaryLine("${selected.size} покупок · ${monthlyItems.size} товаров · ${weightLabel(monthlyItems)}", 14f)
-        root.addView(summary, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
+        )
 
         section("КОЛИЧЕСТВО ПО КАТЕГОРИЯМ")
+
         val grouped = monthlyItems.groupBy(::category)
-        val categoryIcons = listOf("Мясо" to "🥩", "Рыба" to "🐟", "Молочные продукты" to "🧀", "Овощи" to "🥬", "Фрукты" to "🍎")
-        val categoriesRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+
+        val categoryIcons = listOf(
+            "Мясо" to "🥩",
+            "Рыба" to "🐟",
+            "Молочные продукты" to "🧀",
+            "Овощи" to "🥬",
+            "Фрукты" to "🍎"
+        )
+
+        val categoriesRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
         categoryIcons.forEach { (name, icon) ->
             val values = grouped[name].orEmpty()
-            categoriesRow.addView(TextView(this).apply {
-                text = "$icon\n${if (name == "Молочные продукты") "Молочные" else name}\n${money(values.sumOf { it.total })}"
-                textSize = 11f
-                gravity = Gravity.CENTER
-                setTextColor(Color.rgb(24, 55, 38))
-                setPadding(dp(2), dp(9), dp(2), dp(9))
-                setOnClickListener {
-                    start(name)
-                    values.forEach { label("${it.name} — ${money(it.total)}") }
-                    button("← Покупки") { home() }
-                }
-            }, LinearLayout.LayoutParams(0, -2, 1f))
+
+            categoriesRow.addView(
+                TextView(this).apply {
+                    text =
+                        "$icon\n" +
+                        "${if (name == "Молочные продукты") "Молочные" else name}\n" +
+                        money(values.sumOf { it.total })
+
+                    textSize = 11f
+                    gravity = Gravity.CENTER
+                    setTextColor(Color.rgb(24, 55, 38))
+
+                    setPadding(
+                        dp(2),
+                        dp(9),
+                        dp(2),
+                        dp(9)
+                    )
+
+                    setOnClickListener {
+                        start(name)
+
+                        values.forEach {
+                            label(
+                                "${it.name} — ${money(it.total)}"
+                            )
+                        }
+
+                        button("← Покупки") {
+                            home()
+                        }
+                    }
+                },
+                LinearLayout.LayoutParams(0, -2, 1f)
+            )
         }
+
         root.addView(categoriesRow)
-        card("📦  Остальные категории  ›") { categories(monthlyItems) }
-        card("▱  За всё время: ${money(allTotal)} · ${receipts.size} покупок · $totalItems товаров") { reports() }
+
+        card("📦  Остальные категории  ›") {
+            categories(monthlyItems)
+        }
+
+        card(
+            "▱  За всё время: ${money(allTotal)} · " +
+            "${receipts.size} покупок · " +
+            "$totalItems товаров"
+        ) {
+            reports()
+        }
 
         card("⊕  Добавить покупку вручную") {
-            edit(Receipt(LocalDate.now().toString(), "Магазин", 0.0, emptyList()), false)
+            edit(
+                Receipt(
+                    LocalDate.now().toString(),
+                    "Магазин",
+                    0.0,
+                    emptyList()
+                ),
+                false
+            )
         }
-        card("📷  Сфотографировать чек", { takePhoto() }, true)
+
+        // ИСПРАВЛЕНО:
+        // true передаётся в prominent,
+        // действие передаётся последним параметром.
+        card("📷  Сфотографировать чек", true) {
+            takePhoto()
+        }
+
         card("▧  Выбрать фото чека") {
-            val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "image/*" }
+            val intent = Intent(
+                Intent.ACTION_GET_CONTENT
+            ).apply {
+                type = "image/*"
+            }
+
             startActivityForResult(intent, pick)
         }
 
         section("ПОКУПКИ ЗА МЕСЯЦ")
-        if (selected.isEmpty()) label("За этот месяц покупок пока нет", 15)
-        selected.sortedByDescending { it.date }.forEach { receipt ->
-            card("🛍  ${receipt.store}                         ${money(receiptTotal(receipt))}\n" +
-                 "${receipt.date} · ${receipt.items.size} товаров · ${weightLabel(receipt.items)}  ›") {
-                edit(receipt, true)
-            }
+
+        if (selected.isEmpty()) {
+            label(
+                "За этот месяц покупок пока нет",
+                15
+            )
         }
+
+        selected
+            .sortedByDescending { it.date }
+            .forEach { receipt ->
+
+                card(
+                    "🛍  ${receipt.store}    " +
+                    money(receiptTotal(receipt)) +
+                    "\n${receipt.date} · " +
+                    "${receipt.items.size} товаров · " +
+                    "${weightLabel(receipt.items)}  ›"
+                ) {
+                    edit(receipt, true)
+                }
+            }
+
         section("ИТОГИ ПО ГОДАМ")
-        card("📅  ${month.year}    ${money(receipts.filter { it.date.startsWith(month.year.toString()) }.sumOf { receiptTotal(it) })}  ›") { reports() }
+
+        val yearTotal = receipts
+            .filter {
+                it.date.startsWith(month.year.toString())
+            }
+            .sumOf {
+                receiptTotal(it)
+            }
+
+        card(
+            "📅  ${month.year}    ${money(yearTotal)}  ›"
+        ) {
+            reports()
+        }
+
         navBar()
-        label("🔒 Данные и распознавание чеков остаются на телефоне.", 12)
+
+        label(
+            "🔒 Данные и распознавание чеков " +
+            "остаются на телефоне.",
+            12
+        )
     }
 
     private fun input(
         hintText: String,
         value: String
     ): EditText {
-
         val editText = EditText(this).apply {
-
             setText(value)
             textSize = 18f
             hint = hintText
@@ -580,7 +835,6 @@ class MainActivity : Activity() {
         receipt: Receipt,
         existing: Boolean
     ) {
-
         editWithItems(
             receipt,
             existing,
@@ -593,7 +847,6 @@ class MainActivity : Activity() {
         existing: Boolean,
         items: MutableList<Item>
     ) {
-
         start("Проверка чека")
 
         label("Дата (ГГГГ-ММ-ДД)")
@@ -618,7 +871,6 @@ class MainActivity : Activity() {
         )
 
         fun currentReceipt(): Receipt {
-
             return Receipt(
                 date.text.toString(),
                 store.text.toString(),
@@ -635,17 +887,13 @@ class MainActivity : Activity() {
         )
 
         items.forEachIndexed { index, item ->
-
             button(
                 "${item.name} · " +
                 "${item.qty} ${item.unit} · " +
                 money(item.total)
             ) {
-
                 editItem(item) { updated ->
-
                     val updatedItems = items.toMutableList()
-
                     updatedItems[index] = updated
 
                     editWithItems(
@@ -658,7 +906,6 @@ class MainActivity : Activity() {
         }
 
         button("＋ Добавить товар") {
-
             editItem(
                 Item(
                     "",
@@ -667,9 +914,7 @@ class MainActivity : Activity() {
                     0.0
                 )
             ) { newItem ->
-
                 val updatedItems = items.toMutableList()
-
                 updatedItems.add(newItem)
 
                 editWithItems(
@@ -699,7 +944,6 @@ class MainActivity : Activity() {
             printedTotal > 0 &&
             kotlin.math.abs(sum - printedTotal) > 0.01
         ) {
-
             label(
                 "⚠ Сумма позиций отличается от " +
                 "итога чека. Проверьте товары и скидки.",
@@ -710,9 +954,7 @@ class MainActivity : Activity() {
         }
 
         button("✓ Сохранить чек") {
-
             if (items.isEmpty()) {
-
                 Toast.makeText(
                     this,
                     "Нельзя сохранить пустой чек",
@@ -746,9 +988,7 @@ class MainActivity : Activity() {
         item: Item,
         done: (Item) -> Unit
     ) {
-
         val box = LinearLayout(this).apply {
-
             orientation = LinearLayout.VERTICAL
             setPadding(22, 12, 22, 0)
         }
@@ -757,12 +997,9 @@ class MainActivity : Activity() {
             hintText: String,
             value: String
         ): EditText {
-
             return EditText(this).apply {
-
                 hint = hintText
                 setText(value)
-
                 box.addView(this)
             }
         }
@@ -796,7 +1033,6 @@ class MainActivity : Activity() {
             .setTitle("Товар")
             .setView(box)
             .setPositiveButton("Сохранить") { _, _ ->
-
                 done(
                     Item(
                         name.text.toString(),
@@ -812,9 +1048,7 @@ class MainActivity : Activity() {
     }
 
     private fun takePhoto() {
-
         try {
-
             val file = File(
                 cacheDir,
                 "receipt_${System.currentTimeMillis()}.jpg"
@@ -829,7 +1063,6 @@ class MainActivity : Activity() {
             val intent = Intent(
                 MediaStore.ACTION_IMAGE_CAPTURE
             ).apply {
-
                 putExtra(
                     MediaStore.EXTRA_OUTPUT,
                     photoUri
@@ -844,7 +1077,6 @@ class MainActivity : Activity() {
             startActivityForResult(intent, camera)
 
         } catch (e: Exception) {
-
             Toast.makeText(
                 this,
                 "Камера недоступна: ${e.message}",
@@ -859,7 +1091,6 @@ class MainActivity : Activity() {
         resultCode: Int,
         data: Intent?
     ) {
-
         super.onActivityResult(
             requestCode,
             resultCode,
@@ -871,24 +1102,18 @@ class MainActivity : Activity() {
         }
 
         when (requestCode) {
-
             pick -> {
-
                 data?.data?.let {
                     recognize(it)
                 }
             }
 
             camera -> {
-
                 val uri = photoUri
 
                 if (uri != null) {
-
                     recognize(uri)
-
                 } else {
-
                     Toast.makeText(
                         this,
                         "Не удалось получить фотографию",
@@ -898,11 +1123,8 @@ class MainActivity : Activity() {
             }
 
             restoreCode -> {
-
                 data?.data?.let { uri ->
-
                     runCatching {
-
                         val text = contentResolver
                             .openInputStream(uri)!!
                             .bufferedReader()
@@ -911,11 +1133,9 @@ class MainActivity : Activity() {
                             }
 
                         val array = JSONArray(text)
-
                         val restored = mutableListOf<Receipt>()
 
                         for (i in 0 until array.length()) {
-
                             restored.add(
                                 Receipt.from(
                                     array.getJSONObject(i)
@@ -930,7 +1150,6 @@ class MainActivity : Activity() {
                         home()
 
                     }.onFailure {
-
                         Toast.makeText(
                             this,
                             "Ошибка восстановления: ${it.message}",
@@ -942,61 +1161,137 @@ class MainActivity : Activity() {
         }
     }
 
-    // Local grayscale + adaptive threshold. No uploads or external services.
+    // Локальная обработка изображения.
+    // Интернет не используется.
     private fun enhanceReceipt(source: Bitmap): Bitmap {
         val width = source.width
         val height = source.height
-        if (width < 10 || height < 10) return source
-        val scale = (1800.0 / width).coerceIn(1.0, 2.0)
-        val working = if (scale > 1.05) Bitmap.createScaledBitmap(
-            source, (width * scale).toInt(), (height * scale).toInt(), true
-        ) else source
+
+        if (width < 10 || height < 10) {
+            return source
+        }
+
+        val scale = (1800.0 / width)
+            .coerceIn(1.0, 2.0)
+
+        val working = if (scale > 1.05) {
+            Bitmap.createScaledBitmap(
+                source,
+                (width * scale).toInt(),
+                (height * scale).toInt(),
+                true
+            )
+        } else {
+            source
+        }
+
         val w = working.width
         val h = working.height
+
         val pixels = IntArray(w * h)
-        working.getPixels(pixels, 0, w, 0, 0, w, h)
+
+        working.getPixels(
+            pixels,
+            0,
+            w,
+            0,
+            0,
+            w,
+            h
+        )
+
         val gray = IntArray(w * h)
+
         for (i in pixels.indices) {
             val c = pixels[i]
-            gray[i] = ((android.graphics.Color.red(c) * 299 +
-                android.graphics.Color.green(c) * 587 +
-                android.graphics.Color.blue(c) * 114) / 1000)
+
+            gray[i] = (
+                Color.red(c) * 299 +
+                Color.green(c) * 587 +
+                Color.blue(c) * 114
+            ) / 1000
         }
-        // Integral image makes local background estimation linear in image size.
-        val integral = LongArray((w + 1) * (h + 1))
+
+        val integral = LongArray(
+            (w + 1) * (h + 1)
+        )
+
         for (y in 0 until h) {
             var row = 0L
+
             for (x in 0 until w) {
                 row += gray[y * w + x]
-                integral[(y + 1) * (w + 1) + x + 1] =
-                    integral[y * (w + 1) + x + 1] + row
+
+                integral[
+                    (y + 1) * (w + 1) + x + 1
+                ] =
+                    integral[
+                        y * (w + 1) + x + 1
+                    ] + row
             }
         }
+
         val radius = 25
+
         for (y in 0 until h) {
-            val top = (y - radius).coerceAtLeast(0)
-            val bottom = (y + radius + 1).coerceAtMost(h)
+            val top = (y - radius)
+                .coerceAtLeast(0)
+
+            val bottom = (y + radius + 1)
+                .coerceAtMost(h)
+
             for (x in 0 until w) {
-                val left = (x - radius).coerceAtLeast(0)
-                val right = (x + radius + 1).coerceAtMost(w)
-                val sum = integral[bottom * (w + 1) + right] -
+                val left = (x - radius)
+                    .coerceAtLeast(0)
+
+                val right = (x + radius + 1)
+                    .coerceAtMost(w)
+
+                val sum =
+                    integral[bottom * (w + 1) + right] -
                     integral[top * (w + 1) + right] -
                     integral[bottom * (w + 1) + left] +
                     integral[top * (w + 1) + left]
-                val avg = sum / ((bottom - top) * (right - left))
-                val ink = gray[y * w + x] < avg - 13
-                pixels[y * w + x] = if (ink) android.graphics.Color.BLACK
-                    else android.graphics.Color.WHITE
+
+                val avg = sum /
+                    ((bottom - top) * (right - left))
+
+                val ink =
+                    gray[y * w + x] < avg - 13
+
+                pixels[y * w + x] =
+                    if (ink) {
+                        Color.BLACK
+                    } else {
+                        Color.WHITE
+                    }
             }
         }
-        val result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        result.setPixels(pixels, 0, w, 0, 0, w, h)
-        if (working !== source) working.recycle()
+
+        val result = Bitmap.createBitmap(
+            w,
+            h,
+            Bitmap.Config.ARGB_8888
+        )
+
+        result.setPixels(
+            pixels,
+            0,
+            w,
+            0,
+            0,
+            w,
+            h
+        )
+
+        if (working !== source) {
+            working.recycle()
+        }
+
         return result
     }
 
     private fun recognize(uri: Uri) {
-
         start("Распознавание чека")
 
         label(
@@ -1007,9 +1302,7 @@ class MainActivity : Activity() {
         )
 
         Thread {
-
             try {
-
                 val dir = File(
                     filesDir,
                     "ocr"
@@ -1023,21 +1316,16 @@ class MainActivity : Activity() {
                 tess.mkdirs()
 
                 for (lang in listOf("rus", "eng")) {
-
                     val destination = File(
                         tess,
                         "$lang.traineddata"
                     )
 
                     if (!destination.exists()) {
-
                         assets.open(
                             "tessdata/$lang.traineddata"
                         ).use { input ->
-
-                            destination.outputStream().use {
-                                output ->
-
+                            destination.outputStream().use { output ->
                                 input.copyTo(output)
                             }
                         }
@@ -1047,24 +1335,21 @@ class MainActivity : Activity() {
                 val bitmap = if (
                     Build.VERSION.SDK_INT >= 28
                 ) {
-
                     ImageDecoder.decodeBitmap(
                         ImageDecoder.createSource(
                             contentResolver,
                             uri
                         )
                     ) { decoder, _, _ ->
-
                         decoder.allocator =
                             ImageDecoder.ALLOCATOR_SOFTWARE
                     }
-
                 } else {
-
-                    contentResolver.openInputStream(uri).use {
-
-                        BitmapFactory.decodeStream(it)
-                    }
+                    contentResolver
+                        .openInputStream(uri)
+                        .use {
+                            BitmapFactory.decodeStream(it)
+                        }
                 }
 
                 if (bitmap == null) {
@@ -1076,9 +1361,7 @@ class MainActivity : Activity() {
                 val api = TessBaseAPI()
 
                 if (!api.init(dir.absolutePath, "rus+eng")) {
-
                     api.recycle()
-
                     bitmap.recycle()
 
                     throw IllegalStateException(
@@ -1087,29 +1370,25 @@ class MainActivity : Activity() {
                 }
 
                 val raw = try {
-
-                    // Improve faint thermal printing before local OCR.
                     val prepared = enhanceReceipt(bitmap)
+
                     try {
                         api.setImage(prepared)
                         api.getUTF8Text() ?: ""
                     } finally {
-                        if (prepared !== bitmap) prepared.recycle()
+                        if (prepared !== bitmap) {
+                            prepared.recycle()
+                        }
                     }
-
                 } finally {
-
                     api.recycle()
-
                     bitmap.recycle()
                 }
 
                 val parsed = ReceiptParser.parse(raw)
 
                 runOnUiThread {
-
                     if (parsed.items.isEmpty()) {
-
                         Toast.makeText(
                             this,
                             "Товары не найдены. Проверьте текст OCR.",
@@ -1122,24 +1401,19 @@ class MainActivity : Activity() {
                     button(
                         "📄 Показать распознанный текст"
                     ) {
-
                         start("Текст чека (OCR)")
-
                         label(raw, 14)
 
                         button(
                             "← Вернуться к проверке"
                         ) {
-
                             edit(parsed, false)
                         }
                     }
                 }
 
             } catch (e: Exception) {
-
                 runOnUiThread {
-
                     Toast.makeText(
                         this,
                         "Ошибка OCR: ${e.message}",
@@ -1149,29 +1423,24 @@ class MainActivity : Activity() {
                     home()
                 }
             }
-
         }.start()
     }
 
     private fun prices() {
-
         start("Изменение цен")
 
-        val history = receipts.flatMap { receipt ->
-
-            receipt.items.map {
-                receipt.date to it
+        val history = receipts
+            .flatMap { receipt ->
+                receipt.items.map {
+                    receipt.date to it
+                }
+            }
+            .groupBy {
+                it.second.name.lowercase().trim()
             }
 
-        }.groupBy {
-
-            it.second.name.lowercase().trim()
-        }
-
         history.forEach { (name, values) ->
-
             if (values.size >= 2) {
-
                 val sorted = values.sortedBy {
                     it.first
                 }
@@ -1191,9 +1460,7 @@ class MainActivity : Activity() {
                     last.qty.coerceAtLeast(0.0001)
 
                 val change = if (oldPrice > 0) {
-
                     (newPrice / oldPrice - 1) * 100
-
                 } else {
                     0.0
                 }
@@ -1224,7 +1491,6 @@ class MainActivity : Activity() {
     }
 
     private fun food() {
-
         start("Калорийность продуктов")
 
         label(
@@ -1237,15 +1503,11 @@ class MainActivity : Activity() {
         }.forEach { item ->
 
             if (item.kcal100 > 0) {
-
                 val grams = when (
                     item.unit.trim().lowercase()
                 ) {
-
                     "кг" -> item.qty * 1000
-
                     "г", "гр" -> item.qty
-
                     else -> 0.0
                 }
 
@@ -1275,9 +1537,7 @@ class MainActivity : Activity() {
     }
 
     private fun backup() {
-
         try {
-
             val file = File(
                 cacheDir,
                 "pitanie_backup.json"
@@ -1302,7 +1562,6 @@ class MainActivity : Activity() {
             val intent = Intent(
                 Intent.ACTION_SEND
             ).apply {
-
                 type = "application/json"
 
                 putExtra(
@@ -1323,7 +1582,6 @@ class MainActivity : Activity() {
             )
 
         } catch (e: Exception) {
-
             Toast.makeText(
                 this,
                 "Ошибка создания копии: ${e.message}",
@@ -1333,12 +1591,11 @@ class MainActivity : Activity() {
     }
 
     private fun restore() {
-
         val intent = Intent(
             Intent.ACTION_GET_CONTENT
         ).apply {
-
             type = "application/json"
+
             addCategory(
                 Intent.CATEGORY_OPENABLE
             )
